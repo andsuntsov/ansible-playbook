@@ -1,0 +1,36 @@
+---
+- name: Install dependencies
+  become: true
+  ansible.builtin.apt:
+    name:
+      - git
+      - nginx
+    state: present
+    update_cache: true
+
+- name: Create Lighthouse directory
+  ansible.builtin.file:
+    path: "{{ lighthouse_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Clone Lighthouse
+  ansible.builtin.git:
+    repo: "{{ lighthouse_repo }}"
+    dest: "{{ lighthouse_dir }}"
+    version: "{{ lighthouse_version }}"
+
+- name: Deploy nginx config
+  become: true
+  ansible.builtin.template:
+    src: lighthouse.conf.j2
+    dest: "/etc/nginx/sites-available/default"
+    mode: "0644"
+  notify: Restart nginx
+
+- name: Start nginx
+  become: true
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: started

@@ -1,0 +1,9 @@
+[sources.demo_logs]
+type = "file"
+include = ["/var/log/*.log"]
+read_from = "beginning"
+
+[sinks.console]
+type = "console"
+inputs = ["demo_logs"]
+encoding.codec = "json"

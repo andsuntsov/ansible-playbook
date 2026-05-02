@@ -1,0 +1,26 @@
+---
+- name: Download Vector package
+  ansible.builtin.get_url:
+    url: "{{ vector_download_url }}"
+    dest: "/tmp/vector.deb"
+    mode: "0644"
+
+- name: Install Vector
+  become: true
+  ansible.builtin.apt:
+    deb: "/tmp/vector.deb"
+
+- name: Deploy Vector config
+  ansible.builtin.template:
+    src: vector.toml.j2
+    dest: "{{ vector_config_path }}"
+    mode: "0644"
+  notify:
+    - Restart Vector
+
+- name: Enable and start Vector service
+  become: true
+  ansible.builtin.systemd:
+    name: vector
+    enabled: true
+    state: started
